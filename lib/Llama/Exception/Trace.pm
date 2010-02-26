@@ -25,10 +25,9 @@ class Llama::Exception::Trace {
 		);
 		{
 			package DB;
-			no strict;
 			use List::MoreUtils qw(zip);
 			for (my ($i,@c) = (1);@c=caller($i);$i++,@c) {
-				my %items = (zip(@item_names,@c), args => [@args]);
+				my %items = (zip(@item_names,@c), args => [@DB::args]);
 				next if $items{subroutine} =~ /^Llama::Exception/ or $items{package} =~ /^Llama::Exception/;
 				push @trace_items, (Llama::Exception::Trace::DebugItem->new(%items));
     		}
