@@ -26,8 +26,14 @@ class Llama::Exception::Trace {
         {
             package DB;
             use List::MoreUtils qw(zip);
+            use PadWalker qw(peek_my peek_our);
             for (my ($i,@c) = (1);@c=caller($i);$i++,@c) {
-                my %items = (zip(@item_names,@c), args => [@DB::args]);
+                my %items = (
+                    zip(@item_names,@c),
+                    args => [@DB::args],
+                    my_vars => peek_my($i),
+                    our_vars => peek_our($i),
+                );
                 next if $items{subroutine} =~ /^Llama::Exception/ or $items{package} =~ /^Llama::Exception/;
                 push @trace_items, (Llama::Exception::Trace::DebugItem->new(%items));
             }

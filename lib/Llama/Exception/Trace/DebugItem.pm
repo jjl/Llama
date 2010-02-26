@@ -6,6 +6,14 @@ class Llama::Exception::Trace::DebugItem extends Llama::Exception::Trace::Item {
         is => 'ro',
         required => 1,
     );
+    has my_vars => (
+        is => 'ro',
+        required => 1,
+    );
+    has our_vars => (
+        is => 'ro',
+        required => 1,
+    );
     has hasargs => (
         is => 'ro',
         required => 1,
