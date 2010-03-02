@@ -38,4 +38,8 @@ class Llama::Exception::Trace::DebugItem extends Llama::Exception::Trace::Item {
         is => 'ro',
         required => 1,
     );
+    has hinthash => (
+	is => 'ro',
+	required => 1,
+    );
 }
