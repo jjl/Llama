@@ -120,7 +120,7 @@ class Llama::Loader {
     # Regex exclusions
     has _exclude_regexrefs => (
         traits => ['Array'],
-        isa => 'ArrayRef[Str]',
+        isa => 'ArrayRef[RegexpRef]',
         is => 'rw',
         lazy_build => 1,
         handles => {
@@ -133,7 +133,7 @@ class Llama::Loader {
     # Callback exclusions
     has _exclude_coderefs => (
         traits => ['Array'],
-        isa => 'ArrayRef[Str]',
+        isa => 'ArrayRef[CodeRef]',
         is => 'rw',
         lazy_build => 1,
         handles => {
