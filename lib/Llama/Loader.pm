@@ -20,13 +20,21 @@ class Llama::Loader {
        coerce LlFilter
            => from 'RegexpRef'
            => via { [$_] };
+
+       subtype LlStrArrayRef
+           => as 'ArrayRef[Str']
+           => where { 1 };
+       coerce LlStrArrayRef
+           => from 'Str',
+           => via { [$_] };
+
    }
 
 
     # Namespace to load from, eg. MyApp::Plugins
     has _namespaces => (
         traits => ['Array'],
-        isa => 'ArrayRef[Str]',
+        isa => 'LlStrArrayRef',
         is => 'ro',
         init_arg => 'namespaces',
         # FIXME : Replace me with something robust and not ugly
@@ -41,7 +49,7 @@ class Llama::Loader {
     # List of all paths it will attempt to load from
     has _paths => (
         traits => ['Array'],
-        isa => 'ArrayRef[Str]',
+        isa => 'LlStrArrayRef',
         is => 'ro',
         init_arg => 'paths',
         default => sub { [@INC] },
@@ -56,7 +64,7 @@ class Llama::Loader {
     # Path parts. For each item in the search path, try each of these to load the module.
     has _path_parts => (
         traits => ['Array'],
-        isa => 'Str',
+        isa => 'LlStrArrayRef',
         is => 'ro',
         init_arg => 'parts',
         default => sub { [] },
@@ -107,7 +115,7 @@ class Llama::Loader {
     # Name exclusions
     has _exclude_names => (
         traits => ['Array'],
-        isa => 'ArrayRef[Str]',
+        isa => 'LlStrArrayRef',
         is => 'rw',
         lazy_build => 1,
         handles => {
