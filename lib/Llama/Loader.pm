@@ -173,3 +173,151 @@ class Llama::Loader {
 
     method _
 }
+__END__
+
+=head1 NAME
+
+Llama::Loader - Load files and plugins with ludicrous customisability
+
+=head1 SYNOPSIS
+
+ use Llama::Loader;
+ use Data::Dump 'pp';
+ # Note that ALL of these are optional parameters
+ my $loader = Llama::Loader->new(
+   namespaces => 'MyApp::Plugins', # Load things under this namespace
+   paths => '/strange/path/hierarchy', #Load from here instead of @INC
+   parts => 'dev', # For each path, append 'dev' before trying to load
+   exhaust_parts => 0, # See discussion below
+   use_part_tips => 1, # See discussion below
+   create => 1, # Instantiate and return objects rather than names
+   create_args => [qw(foo bar baz)], # arguments to pass to constructors
+   exclude => [
+       qw(MyApp::Plugins::Foo MyApp::Plugins::Bar), # Things by name
+       qr/:[a-z]+$/, # Things by regexp (in this case where the last atom is a lowercase word)
+       sub { ... }, # Things by callback
+   ]
+ );
+ # And pretty print the list of plugins
+ pp([$loader->load_plugins]);
+
+=head1 CONSTRUCTOR PARAMETERS
+
+All of these are setters for the appropriate attributes
+
+=head2 namespaces :: ArrayRef[Str] | <Str> <- default: caller namespace
+=head2 paths :: ArrayRef[Str] | <Str> <- default: @INC
+=head2 parts :: ArrayRef[Str] | <Str> <- default: []
+=head2 exhaust_parts :: Bool <- default: 0
+=head2 use_part_tips :: Bool <- default: 0
+=head2 create :: Bool <- default: 0
+=head2 create_args :: ArrayRef <- default: []
+=head2 exclude :: ArrayRef[ RegexpRef | CodeRef | Str ] | <RegexpRef> | <CodeRef> | <Str> <- default: []
+
+=head1 DATA MEMBERS
+
+You can adjust some of the read only members via METHODS.
+
+=head2 namespaces :: ArrayRef[Str] <- ro
+
+List of namespaces to search in
+
+=head2 paths :: ArrayRef[Str] <- ro
+
+A list of paths to try loading from. If given, does not include @INC unless specified.
+
+=head2 parts :: ArrayRef[Str] <- ro
+
+A list of parts to append onto each path before attempting load.
+
+Given paths = [qw(/foo /bar)] and parts of [qw(baz quux)], it will attempt to load as follows:
+
+/foo/baz
+/foo/quux
+/bar/baz
+/bar/quux
+
+=head2 exhaust_parts :: Bool <- rw
+
+Given the above code, if you wanted to load quux::garble, which resides in /foo/quux/garble,
+ given a part of 'quux', it would fail to load. This will exhaustively attempt to load modules
+from the last atom of their name upwards. Enabling it has performance penalties.
+
+=head2 use_part_tips :: Bool <- rw
+
+Similar to the above, but only attempts to load for the last atom.
+
+=head2 create :: Bool <- rw
+
+Normally, load_plugins will return a list of package names. Tipping this will cause it to instantiate the objects and return them instead.
+
+=head2 create_args :: ArrayRef <- rw
+
+If create is enabled, these args will be passed along
+
+=head2 exclude :: ArrayRef[ RegexpRef | CodeRef | Str ] | <RegexpRef> | <CodeRef> | <Str> <- rw
+
+Allows you to specify complex exclusion rules for modules. For each item, if it matches a string or regexp, it is discarded. If you supplied a coderef, it will be called back with ($packagename,$filepath) and will be discarded if you return a false value.
+
+=head1 METHODS
+
+=head2 add_ns :: (@Str) => ()
+
+Adds one or more namespaces to the library search path
+
+=head2 clear_ns :: () => ()
+
+Clears the library search path of namespaces. Note that this does not restore it to containing the calling namespace.
+
+=head2 add_path :: (@Str) => ()
+
+Adds one or more paths to the file search path.
+
+=head2 add_paths :: (@Str) => ()
+
+Adds one or more paths to the file search path.
+
+=head2 clear_paths :: () => ()
+
+Clears the file search path. Note that this does not restore it to containing @INC.
+
+=head2 add_part :: (@Str) => ()
+
+Adds one or more path parts.
+
+=head2 add_parts :: (@Str) => ()
+
+Adds one or more path parts.
+
+=head2 clear_parts :: () => ()
+
+Clears all path parts.
+
+=head2 load_plugins :: () => ( ArrayRef[ Obj ] | ArrayRef [ Str ] )
+
+If C<create> is set, returns a list of object references, else a list of strings that are loadable plugins.
+
+=head2 load_plugin :: (Str,Str?) => ( ArrayRef[ Obj ] | ArrayRef [ Str ] )
+
+Attempts to load a single named plugin, taking into account any funky paths
+
+=head1 COPYRIGHT AND LICENCE
+
+Copyright 2010 James Laver <cpan at jameslaver dot com>
+
+This file is licenced under the same terms as perl itself.
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Simon Wistow for Module::Pluggable, which I see as having made
+the mistakes I can learn from ;)
+
+=head1 SEE ALSO
+
+L<Llama> - Useful utilities for frameworks
+
+=head1 NOTE ON POD
+
+This uses custom POD formatting that ought to be standardised. See L<http://jameslaver.com/pod-standards.txt> for more information.
+
+=cut
